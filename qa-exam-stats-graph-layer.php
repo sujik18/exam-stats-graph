@@ -147,6 +147,12 @@ class qa_html_theme_layer extends qa_html_theme_base {
                 border: 2px dashed #e5e7eb;
             }
             
+            @media (max-width: 1300px){
+                .qa-exam-stats-container {
+                    width: 93.5%;
+                }
+            }
+            
             @media (max-width: 768px){
                 .qa-exam-stats-container {
                     padding: 20px;

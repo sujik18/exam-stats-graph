@@ -34,6 +34,7 @@ class qa_exam_stats_graph {
                     <option value="difficulty">Difficulty Level</option>
                     <option value="subject">Subject Area</option>
                     <option value="type">Question Type</option>
+                    <option value="perf">Exam Performance</option>
                 </select>
             </div>
             
@@ -48,6 +49,131 @@ class qa_exam_stats_graph {
             const statsData = ' . json_encode($data) . ';
 
             let currentChart = null;
+
+            function createPerformanceChart() {
+                const canvas = document.getElementById("examStatsChart");
+                if (!canvas) return;
+                
+                const context = canvas.getContext("2d");
+                
+                if (currentChart) {
+                    currentChart.destroy();
+                    currentChart = null;
+                }
+                
+                // Reset canvas dimensions to clear any scaling issues
+                const parent = canvas.parentElement;
+                canvas.width = parent.offsetWidth;
+                canvas.height = parent.offsetHeight;
+
+                const data = statsData["perf"];
+                console.log(data);
+
+
+                currentChart = new Chart(context, {
+                    data: {
+                        labels: data.labels,
+                        datasets: [
+                            {
+                                type: "bar",
+                                label: "Your Accuracy (%)",
+                                data: data.user_accuracy,
+                                backgroundColor: "rgba(59, 130, 246, 0.8)", // blue bar
+                                borderColor: "rgba(59, 130, 246, 1)",
+                                borderWidth: 2,
+                                borderRadius: 4,
+                                borderSkipped: false,
+                                yAxisID: "y",
+                            },
+                            {
+                                type: "line",
+                                label: "Topper\'s Average Accuracy (%)",
+                                data: data.topper_accuracy,
+                                borderColor: "rgba(245, 158, 11, 1)", // yellow line
+                                backgroundColor: "rgba(245, 158, 11, 0.2)",
+                                borderWidth: 2,
+                                fill: false,
+                                tension: 0.3,
+                                pointRadius: 4,
+                                pointBackgroundColor: "rgba(245, 158, 11, 1)",
+                                yAxisID: "y"
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: "top",
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 10
+                                }
+                            },
+                            title: {
+                                display: true,
+                                // text: "Exam-wise Accuracy Comparison",
+                                color: "#111827",
+                                font: {
+                                    size: 14,
+                                    weight: "600"
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: "rgba(17, 24, 39, 0.95)",
+                                padding: 8,
+                                borderColor: "rgba(75, 85, 99, 0.5)",
+                                borderWidth: 1,
+                                mode: "index",          // <-- important: show all datasets at that index
+                                intersect: false,       // <-- ensures tooltip appears even if cursor is between points
+                                callbacks: {
+                                    label: function(context) {
+                                        const index = context.dataIndex;
+
+                                        if (context.dataset.label.includes("Your")) {
+                                            return `You: ${data.user_accuracy[index]}%`;
+                                        } else if (context.dataset.label.includes("Topper")) {
+                                            return `Topper: ${data.topper_accuracy[index]}%`;
+                                        }
+
+                                        return context.dataset.label + ": " + context.parsed.y + "%";
+                                    }
+                                }
+                            }
+                                
+
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    // text: "Accuracy (%)"
+                                },
+                                ticks: {
+                                    stepSize: 20,
+                                    color: "#6b7280"
+                                },
+                                grid: {
+                                    color: "rgba(229, 231, 235, 0.8)",
+                                    drawBorder: false
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: "#6b7280"
+                                },
+                                grid: {
+                                    display: false,
+                                    drawBorder: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
             
             function createChart(category) {
                 const canvas = document.getElementById("examStatsChart");
@@ -66,7 +192,114 @@ class qa_exam_stats_graph {
                 canvas.height = parent.offsetHeight;
                 
                 const data = statsData[category];
+
+                if(category === "perf") {
+                    currentChart = new Chart(context, {
+                    data: {
+                        labels: data.labels,
+                        datasets: [
+                            {
+                                type: "bar",
+                                label: "Your Accuracy (%)",
+                                data: data.user_accuracy,
+                                backgroundColor: "rgba(59, 130, 246, 0.8)", // blue bar
+                                borderColor: "rgba(59, 130, 246, 1)",
+                                borderWidth: 2,
+                                borderRadius: 4,
+                                borderSkipped: false,
+                                yAxisID: "y",
+                            },
+                            {
+                                type: "line",
+                                label: "Topper\'s Average Accuracy (%)",
+                                data: data.topper_accuracy,
+                                borderColor: "rgba(245, 158, 11, 1)", // yellow line
+                                backgroundColor: "rgba(245, 158, 11, 0.2)",
+                                borderWidth: 2,
+                                fill: false,
+                                tension: 0.3,
+                                pointRadius: 4,
+                                pointBackgroundColor: "rgba(245, 158, 11, 1)",
+                                yAxisID: "y"
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: "top",
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 10
+                                }
+                            },
+                            title: {
+                                display: true,
+                                // text: "Exam-wise Accuracy Comparison",
+                                color: "#111827",
+                                font: {
+                                    size: 14,
+                                    weight: "600"
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: "rgba(17, 24, 39, 0.95)",
+                                padding: 8,
+                                borderColor: "rgba(75, 85, 99, 0.5)",
+                                borderWidth: 1,
+                                mode: "index",          // <-- important: show all datasets at that index
+                                intersect: false,       // <-- ensures tooltip appears even if cursor is between points
+                                callbacks: {
+                                    label: function(context) {
+                                        const index = context.dataIndex;
+
+                                        if (context.dataset.label.includes("Your")) {
+                                            return `You: ${data.user_accuracy[index]}%`;
+                                        } else if (context.dataset.label.includes("Topper")) {
+                                            return `Topper: ${data.topper_accuracy[index]}%`;
+                                        }
+
+                                        return context.dataset.label + ": " + context.parsed.y + "%";
+                                    }
+                                }
+                            }
+                                
+
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    // text: "Accuracy (%)"
+                                },
+                                ticks: {
+                                    stepSize: 20,
+                                    color: "#6b7280"
+                                },
+                                grid: {
+                                    color: "rgba(229, 231, 235, 0.8)",
+                                    drawBorder: false
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: "#6b7280"
+                                },
+                                grid: {
+                                    display: false,
+                                    drawBorder: false
+                                }
+                            }
+                        }
+                    }
+                });
+                }
                 
+                else{
                 currentChart = new Chart(context, {
                     type: "bar",
                     data: {
@@ -181,23 +414,27 @@ class qa_exam_stats_graph {
                         }
                     }
                 });
+}
             }
-            
+                    
             // Initialize chart with default category
             createChart("difficulty");
-            
-            // Update chart when category changes
+                
             const categorySelect = document.getElementById("exam-stats-category");
-            if (categorySelect) {
-                categorySelect.addEventListener("change", function(e) {
+            categorySelect.addEventListener("change", function (e) {
+                const value = e.target.value;
+                if (value === "perf") {
+                    createPerformanceChart();
+                }
+                else {
                     createChart(e.target.value);
-                });
-
-            }
+                }
+            });
+            
             const observer = new MutationObserver(() => {
                 createChart("difficulty");
             });
-            
+                    
         })();
         </script>';
     }
@@ -384,6 +621,11 @@ class qa_exam_stats_graph {
                 }
             }
         }
+        $performance_data = array(
+            'labels' => array('Exam 1', 'Exam 2', 'Exam 3', 'Exam 4'),
+            'user_accuracy' => array(72, 84, 63, 91), // sample user accuracy %
+            'topper_accuracy' => array(95, 96, 90, 98) // sample topper accuracy %
+        );
         // echo "<pre>";
         // print_r($difficulty_stats);
         // echo "</pre>";
@@ -411,6 +653,7 @@ class qa_exam_stats_graph {
                 'correct'   => array_map(fn($l) => $type_stats[$l]['correct'], $type_labels),
                 'skipped'   => array_map(fn($l) => $type_stats[$l]['skipped'], $type_labels),
             ),
+            'perf' => $performance_data,
         );
     }
 
