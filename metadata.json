@@ -1,0 +1,13 @@
+{
+  "name": "Exam Statistics Graph",
+  "uri": "https://github.com/sujik18/exam-stats-graph",
+  "description": "Displays exam question statistics with graphs based on difficulty, subject, and type",
+  "version": "1.0",
+  "date": "2025-11-01",
+  "author": "Sujith Kanakkassery",
+  "author_uri": "https://github.com/sujik18",
+  "update_uri": "https://raw.githubusercontent.com/sujik18/exam-stats-graph/main/metadata.json",
+  "license": "GPLv2",
+  "min_q2a": "1.8",
+  "load_order": "after_db_init"
+}
