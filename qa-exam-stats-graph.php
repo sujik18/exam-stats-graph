@@ -469,7 +469,7 @@ class qa_exam_stats_graph {
     }
 
     public static function get_stats_data() {
-        include_once('/var/www/html/qa/qa-plugin/exam-creator/db/selects.php');
+        require_once('/var/www/html/qa/qa-plugin/exam-creator/db/selects.php');
         $handle = qa_request_part(1); 
         $userid = qa_handle_to_userid($handle);
         // $userid = qa_get_logged_in_userid();
