@@ -143,7 +143,9 @@ class qa_exam_stats_graph {
                                 callbacks: {
                                     title: function(tooltipItems) {
                                         const index = tooltipItems[0].dataIndex;
-                                        return statsData.perf.exam_names[index];
+                                        const xLabel = statsData.perf.labels[index];
+                                        const examName = statsData.perf.exam_names[index];
+                                        return xLabel + "\n" + examName;
                                     },
                                     label: function(context) {
                                         const index = context.dataIndex;
@@ -334,7 +336,13 @@ class qa_exam_stats_graph {
             window.addEventListener("DOMContentLoaded", () => {
                 requestAnimationFrame(() => createChart("difficulty"));
             });
-                            
+            
+            window.addEventListener("load", function () {
+                if (examStatsChart) {
+                    examStatsChart.resize();
+                }
+            });
+                  
             // Update chart when category changes
             const categorySelect = document.getElementById("exam-stats-category");
             categorySelect.addEventListener("change", function (e) {
@@ -385,7 +393,8 @@ class qa_exam_stats_graph {
         $exam_user_percentage = array();
         $exam_avg_topper_percentage = array();
         $exam_name = array();
-        $exam_id = array();
+        $exam_ids = array();
+        $exam_labels = array();
 
         $exam_marks = array();
         foreach ($exam_results as $result) {
@@ -394,7 +403,8 @@ class qa_exam_stats_graph {
             $exam_info = RetrieveExamInfo_db($examid, "var");
 
             $exam_string = 'ExamID ' . $examid;
-            array_push($exam_id, $exam_string);
+            array_push($exam_ids, $examid);
+            array_push($exam_labels, $exam_string);
             array_push($exam_name, $exam_info['name']);
             $user_marks = $result['marks'];
             $total_marks = $exam_info['total_marks'];
@@ -470,7 +480,7 @@ class qa_exam_stats_graph {
                         'Compiler-design'       => 'Compilers',
                         'databases'             => 'Databases',
                         'data-structures'       => 'C & DS',
-                        'Algorithms'            => 'Algorithms',
+                        'algorithms'            => 'Algorithms',
                         'theory-of-computation' => 'TOC',
                         'digital-logic'         => 'DL',
                         // 'engineering-mathematics' => 'EM',
@@ -537,7 +547,8 @@ class qa_exam_stats_graph {
             }
         }
         $performance_data = array(
-            'labels' => array_values($exam_id),
+            'id' => array_values($exam_ids),
+            'labels' => array_values($exam_labels),
             'exam_names' => array_values($exam_name),
             'user_accuracy' => array_values($exam_user_percentage),
             'topper_accuracy' => array_values($exam_avg_topper_percentage)

@@ -87,6 +87,8 @@ class qa_html_theme_layer extends qa_html_theme_base {
                 position: relative;
                 overflow-x: auto;
                 overflow-y: hidden;
+                min-height: 350px;  
+                flex: 0 0 auto;
             }
             
             .qa-exam-stats-container {
@@ -94,7 +96,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
                 z-index: 100;
                 margin: 10px 30px 10px 30px;
                 min-width: 300px;
-                width: 45%;
+                width: 93%;
             }
             
             .qa-exam-stats-chart-canvas {
@@ -102,7 +104,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
                 height: 300px !important;
                 max-height: 600px;
                 responsive: true;
-
+                min-height: 350px !important;
                 overflow-x: auto;
             }
 
