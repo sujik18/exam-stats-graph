@@ -413,6 +413,7 @@ class qa_exam_stats_graph {
             $user_marks = $result['marks'];
             $total_marks = $exam_info['total_marks'];
             $user_percentage = ($total_marks > 0) ? ($user_marks / $total_marks) * 100 : 0;
+            if ($user_percentage < 0) $user_percentage = 0; //prevent negative percentages
             array_push($exam_user_percentage, round($user_percentage,2));
 
             $totaltime = $exam_info['duration'];
@@ -431,7 +432,7 @@ class qa_exam_stats_graph {
 
             $top_avg_marks = ($count > 0) ? $sum_marks / $count : 0;
             $top_avg_accuracy = ($total_marks > 0) ? ($top_avg_marks / $total_marks) * 100 : 0;
-            if ($topper_avg_accuracy > 99) $topper_avg_accuracy = 99;
+            if ($top_avg_accuracy > 99) $top_avg_accuracy = 99; //prevent 10%
             array_push($exam_avg_topper_percentage, round($top_avg_accuracy, 2));
 
             if (!$exam_info || empty($exam_info['section'])) continue;
