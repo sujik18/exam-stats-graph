@@ -40,7 +40,7 @@ class qa_exam_stats_graph {
             <div class="qa-exam-stats-controls">
                 <label for="exam-stats-category" class="qa-exam-stats-label">View Statistics By:</label>
                 <select id="exam-stats-category" class="qa-exam-stats-select">
-                    <option value="difficulty" selected>Difficulty Level</option>
+                    <option value="difficulty">Difficulty Level</option>
                     <option value="subject">Subject Area</option>
                     <option value="type">Question Type</option>
                     <option value="perf">Exam Performance</option>
@@ -79,7 +79,8 @@ class qa_exam_stats_graph {
                 canvas.height = parent.offsetHeight;
 
                 const data = statsData["perf"];
-                // console.log(data);
+                console.log(data);
+                console.log(statsData.perf.exam_names);
 
 
                 currentChart = new Chart(context, {
@@ -328,16 +329,12 @@ class qa_exam_stats_graph {
                     }
                 });
             }
-                    
-            // Initialize chart with default category
+           
+            
             window.addEventListener("DOMContentLoaded", () => {
-                if (document.readyState === "complete") {
-                    const select = document.getElementById("exam-stats-category");
-                    select.value = "difficulty";
-                    createChart("difficulty");
-                }
+                requestAnimationFrame(() => createChart("difficulty"));
             });
-                
+                            
             // Update chart when category changes
             const categorySelect = document.getElementById("exam-stats-category");
             categorySelect.addEventListener("change", function (e) {
@@ -365,12 +362,11 @@ class qa_exam_stats_graph {
     
     public function init_queries($tableslc) {
         return null;
-    }
-
+    }  
     public static function get_stats_data($userid) {
-        // require_once('/var/www/html/qa/qa-plugin/exam-creator/db/selects.php');s
-
-        $difficulty_labels = array('Total', 'Easy', 'Hard', '1 Mark', '2 Marks');
+        // require_once('/var/www/html/qa/qa-plugin/exam-creator/db/selects.php');
+        
+        $difficulty_labels = array('Total', 'Easy', 'Medium', 'Hard', '1 Mark', '2 Marks');
         $subject_labels = array('Total', 'Aptitude', 'Mathematics', 'DL', 'COA', 'C & DS', 'Algorithms', 'TOC', 'CD', 'OS', 'Databses', 'CN', 'General', 'Other');
         $type_labels = array('Total', 'NAT', 'MCQ', 'MSQ');
 
@@ -384,9 +380,7 @@ class qa_exam_stats_graph {
                 WHERE userid = # 
                 ORDER BY datetime ASC",
                 $userid
-            )
-        );
-
+        ));
         //for perf array 
         $exam_user_percentage = array();
         $exam_avg_topper_percentage = array();
@@ -395,39 +389,36 @@ class qa_exam_stats_graph {
 
         $exam_marks = array();
         foreach ($exam_results as $result) {
-
             $response_table = json_decode(stripslashes($result['responsestring']), true);
             $examid = $result['examid'];
             $exam_info = RetrieveExamInfo_db($examid, "var");
-            
-            if($total_questions >= 30){   
-                $exam_string = 'ExamID ' . $examid;
-                array_push($exam_id, $exam_string);
-                array_push($exam_name, $exam_info['name']);
-                $user_marks = $result['marks'];
-                $total_marks = $exam_info['total_marks'];
-                $total_questions = $exam_info['total_qs'];
-                $user_percentage = ($total_marks > 0) ? ($user_marks / $total_marks) * 100 : 0;
-                array_push($exam_user_percentage, round($user_percentage,2));
 
-                $totaltime = $exam_info['duration'];
-                $total_exam_attempts = get_exam_attempts($examid);
-                $limit = max(1, round(0.1 * $total_exam_attempts));
-                $spec = qa_exam_db_examtoppers_selectspec($examid, $totaltime, $limit);
-                $toppers = qa_db_select_with_pending($spec);
+            $exam_string = 'ExamID ' . $examid;
+            array_push($exam_id, $exam_string);
+            array_push($exam_name, $exam_info['name']);
+            $user_marks = $result['marks'];
+            $total_marks = $exam_info['total_marks'];
+            $user_percentage = ($total_marks > 0) ? ($user_marks / $total_marks) * 100 : 0;
+            array_push($exam_user_percentage, round($user_percentage,2));
 
-                $sum_marks = 0;
-                $count = 0;
+            $totaltime = $exam_info['duration'];
+            $total_exam_attempts = get_exam_attempts($examid);
+            $limit = max(1, round(0.1 * $total_exam_attempts));
+            $spec = qa_exam_db_examtoppers_selectspec($examid, $totaltime, $limit);
+            $toppers = qa_db_select_with_pending($spec);
 
-                foreach ($toppers as $uid => $row) {
-                    $sum_marks += floatval($row['marks']);
-                    $count++;
-                }
+            $sum_marks = 0;
+            $count = 0;
 
-                $top_avg_marks = ($count > 0) ? $sum_marks / $count : 0;
-                $top_avg_accuracy = ($total_marks > 0) ? ($top_avg_marks / $total_marks) * 100 : 0;
-                array_push($exam_avg_topper_percentage, round($top_avg_accuracy, 2));
+            foreach ($toppers as $uid => $row) {
+                $sum_marks += floatval($row['marks']);
+                $count++;
             }
+
+            $top_avg_marks = ($count > 0) ? $sum_marks / $count : 0;
+            $top_avg_accuracy = ($total_marks > 0) ? ($top_avg_marks / $total_marks) * 100 : 0;
+            if ($topper_avg_accuracy > 99) $topper_avg_accuracy = 99;
+            array_push($exam_avg_topper_percentage, round($top_avg_accuracy, 2));
 
             if (!$exam_info || empty($exam_info['section'])) continue;
             $section_array=$exam_info["section"];
@@ -475,10 +466,11 @@ class qa_exam_stats_graph {
                         'aptitude'              => 'Aptitude',
                         // 'discrete mathematics'  => 'DM',
                         'mathematics'           => 'Mathematics',
-                        'operating-system'      => 'OS',
-                        'compiler-design'       => 'Compilers',
+                        'Operating System'      => 'OS',
+                        'Compiler-design'       => 'Compilers',
                         'databases'             => 'Databases',
                         'data-structures'       => 'C & DS',
+                        'Algorithms'            => 'Algorithms',
                         'theory-of-computation' => 'TOC',
                         'digital-logic'         => 'DL',
                         // 'engineering-mathematics' => 'EM',
@@ -513,23 +505,31 @@ class qa_exam_stats_graph {
                     foreach($tags as $tag) {
                         $tag_lower = strtolower($tag);
                         if (isset($type_map[$tag_lower])) {
-                            $mcq = 0;
                             self::update_stat($type_stats[$type_map[$tag_lower]], $isAttempted, $isCorrect, $isSkipped);
                         }
-                        else{
-                            self::update_stat($type_stats['MCQ'], $isAttempted, $isCorrect, $isSkipped);
-                        }
+                        // else{
+                        //     self::update_stat($type_stats['MCQ'], $isAttempted, $isCorrect, $isSkipped);
+                        // }
                     }
-                    
+
                     //Difficulty
-                    foreach($tags as $tag) {
+                    foreach ($tags as $tag) {
                         $tag_lower = strtolower($tag);
-                        if (isset($difficulty_map[$tag_lower])) {
-                            self::update_stat($difficulty_stats[$difficulty_map[$tag_lower]], $isAttempted, $isCorrect, $isSkipped);
+                        $category_lower = strtolower(trim($qs_array[$j]['category']));
+
+                        // Difficulty-based tags
+                        if (in_array($tag_lower, ['easy', 'difficult'])) {
+                            // $medium = 0;
+                            self::update_stat($difficulty_stats[$tag_lower == 'easy' ? 'Easy' : ucfirst($tag_lower)], $isAttempted, $isCorrect, $isSkipped);
+                        }
+                        // Marks-based tags
+                        if (strpos($tag_lower, 'one-mark') !== false) {
+                            self::update_stat($difficulty_stats['1 Mark'], $isAttempted, $isCorrect, $isSkipped);
+                        } elseif (strpos($tag_lower, 'two-marks') !== false) {
+                            self::update_stat($difficulty_stats['2 Marks'], $isAttempted, $isCorrect, $isSkipped);
                         }
                     }
 
-                    // Update total counts
                     self::update_stat($difficulty_stats['Total'], $isAttempted, $isCorrect, $isSkipped);
                     self::update_stat($subject_stats['Total'], $isAttempted, $isCorrect, $isSkipped);
                     self::update_stat($type_stats['Total'], $isAttempted, $isCorrect, $isSkipped);
