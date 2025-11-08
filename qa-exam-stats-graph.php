@@ -439,7 +439,7 @@ class qa_exam_stats_graph {
             $response_table = json_decode(stripslashes($result['responsestring']), true);
             $examid = $result['examid'];
             $exam_info = RetrieveExamInfo_db($examid, "var");
-            $exam_accesslist_dict[$examid] = $exam_info['accesslist'];
+            $exam_accesslist_dict[$examid] = $exam_info['accesslists'];
             console_log($exam_accesslist_dict);
 
             // if($exam_info['total_qs'] >= 30){   //show all exams for now
