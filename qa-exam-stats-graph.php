@@ -380,7 +380,7 @@ class qa_exam_stats_graph {
         // require_once('/var/www/html/qa/qa-plugin/exam-creator/db/selects.php');
         
         //Labels for chart
-        $difficulty_labels = array('Total', 'Easy', 'Medium', 'Hard', '1 Mark', '2 Marks');
+        $difficulty_labels = array('Total', 'Easy', 'Hard', '1 Mark', '2 Marks');
         $subject_labels = array(
             // 'Total',
             
@@ -609,12 +609,17 @@ class qa_exam_stats_graph {
 
                         if (strpos($tag_lower, 'one-mark') !== false) {
                             $marks_difficulty = '1 Mark';
+                            $marks_found = true;
                             break;
                         }
                         if (strpos($tag_lower, 'two-marks') !== false) {
                             $marks_difficulty = '2 Marks';
+                            $marks_found = true;
                             break;
                         }
+                    }
+                    if (!$marks_found) {
+                        $marks_difficulty = '1 Mark';
                     }
                     self::update_stat($difficulty_stats[$marks_difficulty], $isAttempted, $isCorrect, $isSkipped);
 

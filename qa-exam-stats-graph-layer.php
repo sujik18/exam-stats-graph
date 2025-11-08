@@ -8,6 +8,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
         $this->output('
         <style>
             .qa-exam-stats-container {
+                margin: 10px 30px 10px 30px;
                 padding: 25px;
                 background: #ffffff;
                 border-radius: 12px;
@@ -16,9 +17,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
                 height: 600px;
                 position: relative;
                 z-index: 100;
-                margin: 10px 30px 10px 30px;
-                min-width: 300px;
-                width: 93%;
+                width: 92.5%;
                 //horizontal scroll
                 overflow-x: auto;
                 // overflow-y: auto;
@@ -35,7 +34,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
                 font-size: 30px;
                 font-weight: 500;
                 color: #1f2937;
-                margin: 0 0 10px 0; //top left bottom right
+                margin: 5px 0 10px 15px; //top right bottom left
             }
             
             .qa-exam-stats-subtitle {
@@ -92,22 +91,16 @@ class qa_html_theme_layer extends qa_html_theme_base {
                 overflow-y: hidden;
                 min-height: 350px;  
                 flex: 0 0 auto;
-            }
-            
-            .qa-exam-stats-container {
-                position: relative;
-                z-index: 100;
-                margin: 10px 30px 10px 30px;
-                min-width: 300px;
-                width: 93%;
+                width: 100%;
             }
             
             .qa-exam-stats-chart-canvas {
-                width: 100%;
                 height: 300px !important;
                 max-height: 400px;
                 min-height: 250px !important;
                 overflow-x: auto;
+                min-width: 105%;
+                display: block;
             }
 
             
