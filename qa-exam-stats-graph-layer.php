@@ -182,7 +182,6 @@ class qa_html_theme_layer extends qa_html_theme_base {
 
             [data-theme="dark"] .qa-exam-stats-header,
             [data-theme="dark"] .qa-exam-stats-title,
-            [data-theme="dark"] .qa-exam-stats-subtitle,
             [data-theme="dark"] .qa-exam-stats-controls,
             [data-theme="dark"] .qa-exam-stats-label,
             [data-theme="dark"] .qa-exam-stats-select,
@@ -197,7 +196,9 @@ class qa_html_theme_layer extends qa_html_theme_base {
                 border-color: #2e3138ff !important;
                 color: #f9f9f9 !important;
             }
- 
+            [data-theme="dark"] .qa-exam-stats-subtitle {
+                color: #6b7280;
+            }
             [data-theme="dark"] .qa-exam-stats-chart-wrapper,
             [data-theme="dark"] .qa-exam-stats-container,
             [data-theme="dark"] {
