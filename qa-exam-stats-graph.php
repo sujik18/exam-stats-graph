@@ -33,7 +33,7 @@ class qa_exam_stats_graph {
         echo '
         <div class="qa-exam-stats-container">
             <div class="qa-exam-stats-header">
-                <h2 class="qa-exam-stats-title">Exam Statistics</h2>
+                <div class="qa-exam-stats-title">Exam Statistics</div>
                 <p class="qa-exam-stats-subtitle">Analyze your performance across different categories</p>
             </div>
             
@@ -79,8 +79,8 @@ class qa_exam_stats_graph {
                 canvas.height = parent.offsetHeight;
 
                 const data = statsData["perf"];
-                console.log(data);
-                console.log(statsData.perf.exam_names);
+                // console.log(data);
+                // console.log(statsData.perf.exam_names);
 
 
                 currentChart = new Chart(context, {
@@ -379,6 +379,7 @@ class qa_exam_stats_graph {
     public static function get_stats_data($userid) {
         // require_once('/var/www/html/qa/qa-plugin/exam-creator/db/selects.php');
         
+        //Labels for chart
         $difficulty_labels = array('Total', 'Easy', 'Medium', 'Hard', '1 Mark', '2 Marks');
         $subject_labels = array(
             // 'Total',
@@ -411,7 +412,6 @@ class qa_exam_stats_graph {
             
             'Other'
         );
-
         $type_labels = array('Total', 'NAT', 'MCQ', 'MSQ');
 
         $difficulty_stats = array_fill_keys($difficulty_labels, ['attempted' => 0, 'correct' => 0, 'skipped' => 0]);
@@ -480,7 +480,6 @@ class qa_exam_stats_graph {
 
                 $section_name = $section_array[$i]["name"];
                 $qs_array= $section_array[$i]["question"];
-                echo '<script> console.log('.json_encode($qs_array).') </script>';
                 for($j=0; $j<sizeOf($qs_array); $j++)
                 {
                     $postid = $qs_array[$j]["post_id"];
@@ -547,12 +546,12 @@ class qa_exam_stats_graph {
                         'programming in python'    => 'Python',
                     ];
 
-                    $difficulty_map = [
-                        'easy'    => 'Easy',
-                        'difficult'    => 'Hard',
-                        'one-mark'    => '1 Mark',
-                        'two-marks'   => '2 Marks',
-                    ];
+                    // $difficulty_map = [
+                    //     'easy'    => 'Easy',
+                    //     'difficult'    => 'Hard',
+                    //     'one-mark'    => '1 Mark',
+                    //     'two-marks'   => '2 Marks',
+                    // ];
 
                     $type_map = [
                         'numerical-answers'  => 'NAT',
@@ -579,22 +578,45 @@ class qa_exam_stats_graph {
                     self::update_stat($type_stats[$question_type], $isAttempted, $isCorrect, $isSkipped);
 
                     //Difficulty
-                    foreach ($tags as $tag) {
-                        $tag_lower = strtolower($tag);
-                        $category_lower = strtolower(trim($qs_array[$j]['category']));
+                    $difficulty_found = false;
+                    $question_difficulty = null;
+                    $marks_difficulty = null;
 
-                        // Difficulty-based tags
-                        if (in_array($tag_lower, ['easy', 'difficult'])) {
-                            // $medium = 0;
-                            self::update_stat($difficulty_stats[$tag_lower == 'easy' ? 'Easy' : ucfirst($tag_lower)], $isAttempted, $isCorrect, $isSkipped);
+                    //Difficulty-based tags
+                    foreach ($tags as $tag) {
+                        $tag_lower = strtolower(trim($tag));
+
+                        // Exact match for easy / difficult
+                        if ($tag_lower === 'easy') {
+                            $question_difficulty = 'Easy';
+                            $difficulty_found = true;
+                            break;
                         }
-                        // Marks-based tags
-                        if (strpos($tag_lower, 'one-mark') !== false) {
-                            self::update_stat($difficulty_stats['1 Mark'], $isAttempted, $isCorrect, $isSkipped);
-                        } elseif (strpos($tag_lower, 'two-marks') !== false) {
-                            self::update_stat($difficulty_stats['2 Marks'], $isAttempted, $isCorrect, $isSkipped);
+                        if ($tag_lower === 'difficult' || $tag_lower === 'hard') {
+                            $question_difficulty = 'Hard';
+                            $difficulty_found = true;
+                            break;
                         }
                     }
+                    if (!$difficulty_found) {
+                        $question_difficulty = 'Medium';
+                    }
+                    self::update_stat($difficulty_stats[$question_difficulty], $isAttempted, $isCorrect, $isSkipped);
+
+                    //Mark based tags
+                    foreach ($tags as $tag) {
+                        $tag_lower = strtolower(trim($tag));
+
+                        if (strpos($tag_lower, 'one-mark') !== false) {
+                            $marks_difficulty = '1 Mark';
+                            break;
+                        }
+                        if (strpos($tag_lower, 'two-marks') !== false) {
+                            $marks_difficulty = '2 Marks';
+                            break;
+                        }
+                    }
+                    self::update_stat($difficulty_stats[$marks_difficulty], $isAttempted, $isCorrect, $isSkipped);
 
                     self::update_stat($difficulty_stats['Total'], $isAttempted, $isCorrect, $isSkipped);
                     // self::update_stat($subject_stats['Total'], $isAttempted, $isCorrect, $isSkipped);
@@ -609,7 +631,7 @@ class qa_exam_stats_graph {
             'user_accuracy' => array_values($exam_user_percentage),
             'topper_accuracy' => array_values($exam_avg_topper_percentage)
         );
-        echo '<script> console.log('.json_encode($category_dict).') </script>';
+        // echo '<script> console.log('.json_encode($category_dict).') </script>';
         return array(
             'difficulty' => array(
                 'labels' => $difficulty_labels,

@@ -32,8 +32,8 @@ class qa_html_theme_layer extends qa_html_theme_base {
             }
             
             .qa-exam-stats-title {
-                font-size: 24px;
-                font-weight: 600;
+                font-size: 30px;
+                font-weight: 500;
                 color: #1f2937;
                 margin: 0 0 10px 0; //top left bottom right
             }
@@ -165,7 +165,7 @@ class qa_html_theme_layer extends qa_html_theme_base {
                 }
                 
                 .qa-exam-stats-title {
-                    font-size: 50px;
+                    font-size: 25px;
                 }
                 
                 .qa-exam-stats-controls {
