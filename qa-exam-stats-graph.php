@@ -383,7 +383,8 @@ class qa_exam_stats_graph {
         
         $difficulty_labels = array('Total', 'Easy', 'Medium', 'Hard', '1 Mark', '2 Marks');
         $subject_labels = array(
-            'Total',
+            // 'Total',
+            
             // Aptitude
             'A. Aptitude',
             'G. Aptitude',
@@ -440,7 +441,7 @@ class qa_exam_stats_graph {
             $examid = $result['examid'];
             $exam_info = RetrieveExamInfo_db($examid, "var");
 
-            if($exam_info['total_qs'] >= 30){   
+            // if($exam_info['total_qs'] >= 30){   //show all exams for now
                 $exam_string = 'ExamID ' . $examid;
                 array_push($exam_ids, $examid);
                 array_push($exam_labels, $exam_string);
@@ -469,7 +470,7 @@ class qa_exam_stats_graph {
                 $top_avg_accuracy = ($total_marks > 0) ? ($top_avg_marks / $total_marks) * 100 : 0;
                 if ($top_avg_accuracy > 99) $top_avg_accuracy = 99; //prevent 10%
                 array_push($exam_avg_topper_percentage, round($top_avg_accuracy, 2));
-            }
+            // }
 
             if (!$exam_info || empty($exam_info['section'])) continue;
             $section_array=$exam_info["section"];
@@ -598,7 +599,7 @@ class qa_exam_stats_graph {
                     }
 
                     self::update_stat($difficulty_stats['Total'], $isAttempted, $isCorrect, $isSkipped);
-                    self::update_stat($subject_stats['Total'], $isAttempted, $isCorrect, $isSkipped);
+                    // self::update_stat($subject_stats['Total'], $isAttempted, $isCorrect, $isSkipped);
                     self::update_stat($type_stats['Total'], $isAttempted, $isCorrect, $isSkipped);
                 }
             }
