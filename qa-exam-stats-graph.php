@@ -21,13 +21,17 @@ class qa_exam_stats_graph {
     {   
         $handle = qa_request_part(1); 
         $userid = qa_handle_to_userid($handle);
+        $logged_in_userid = qa_get_logged_in_userid();
         $exam_count = qa_db_read_one_value(qa_db_query_sub(
             "SELECT COUNT(*) FROM ^exam_results WHERE userid = #",
             $userid
         ), true);
 
         if ($exam_count == 0) return;
-
+        // if ($userid != $logged_in_userid){
+        //     echo "<script>console.log('Exam Stats Graph Hidden: Other users stats cannot be viewed');</script>";
+        //     return;
+        // }
         $data = self::get_stats_data($userid);
 
         echo '
@@ -490,13 +494,25 @@ class qa_exam_stats_graph {
             // 'mcq'                => 'MCQ',
         ];
         $accesslist_names_map = [
-            "3" => "GO Test",
-            "1" => "Free GO / GO Classes Test",
-            "6166" => "GO Classes CSE",
-            "5" => "GO Classes DA Test",
-            "6" => "Paid Weekly Quiz",
-            "7" => "Free Weekly Quiz",
-            "8" => "IIIT-H"
+            // for 2025
+            // 1: Go test
+            // 3: free go, go classes test
+            // 4: Go classes cse
+            // 5: Go classes DA test
+            // 6: Paid weekly
+            // 7: free weekly quiz
+            // 8: IIIT-H
+            
+            "1" => "GATEOverflow Test Series", //2024 full length
+            "2" => "GATEOverflow Test Series", // 2024
+            "3" => "GATEOverflow Test Series", // 2023
+            "0" => "Free CSE Weekly Quiz and Test",
+            "6166" => "GO Classes CSE Test Series",
+            "18261" => "GO Classes DA Test Series",
+            "181161" => "Paid CSE Weekly Quiz",
+            "7" => "Free DA Weekly Quiz",
+            "8" => "IIIT-H Test Series",
+            "none" => "Open Exam"
         ];
 
 
@@ -701,7 +717,7 @@ class qa_exam_stats_graph {
                 }
             }
         }
-        echo '<script> console.log('.json_encode($accesslist_data).') </script>';
+
         $performance_data = array(
             'id' => array_values($exam_ids),
             'labels' => array_values($exam_labels),
@@ -709,8 +725,9 @@ class qa_exam_stats_graph {
             'user_accuracy' => array_values($exam_user_percentage),
             'topper_accuracy' => array_values($exam_avg_topper_percentage)
         );
-
         // echo '<script> console.log('.json_encode($category_dict).') </script>';
+
+        echo '<script> console.log('.json_encode($accesslist_data).') </script>';
         $accesslist_filtered = [];
         // only include accesslists that user has exams in
         foreach ($accesslist_data as $key => $d) {
