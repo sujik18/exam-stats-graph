@@ -217,28 +217,34 @@ class qa_exam_stats_graph {
                 // 4 intervals for all graph
                 let step = Math.ceil(maxValue / 4);
                 
+                const attempted = data.attempted;
+                const correct = data.correct;
+                const incorrect = attempted.map((a, i) => a - correct[i]);
+
                 currentChart = new Chart(context, {
                     type: "bar",
                     data: {
                         labels: data.labels,
                         datasets: [
                             {
-                                label: "Total Attempted",
-                                data: data.attempted,
-                                backgroundColor: "rgba(59, 130, 246, 0.8)",
-                                borderColor: "rgba(59, 130, 246, 1)",
-                                borderWidth: 2,
-                                borderRadius: 4,
-                                borderSkipped: false,
-                            },
-                            {
-                                label: "Correct Attempts",
-                                data: data.correct,
+                                label: "Correct",
+                                data: correct,
                                 backgroundColor: "rgba(34, 197, 94, 0.8)",
                                 borderColor: "rgba(34, 197, 94, 1)",
                                 borderWidth: 2,
                                 borderRadius: 4,
                                 borderSkipped: false,
+                                stack: "attemptStack"
+                            },
+                            {
+                                label: "Incorrect",
+                                data: incorrect,
+                                backgroundColor: "rgba(239, 68, 68, 0.8)",
+                                borderColor: "rgba(239, 68, 68, 1)",
+                                borderWidth: 2,
+                                borderRadius: 4,
+                                borderSkipped: false,
+                                stack: "attemptStack"
                             },
                             {
                                 label: "Skipped",
@@ -300,6 +306,7 @@ class qa_exam_stats_graph {
                         },
                         scales: {
                             y: {
+                                stacked: true,
                                 beginAtZero: true,
                                 ticks: {
                                     stepSize: step,
@@ -317,6 +324,7 @@ class qa_exam_stats_graph {
                                 }
                             },
                             x: {
+                                stacked: true,
                                 ticks: {
                                     font: {
                                         size: 10
@@ -572,13 +580,6 @@ class qa_exam_stats_graph {
                         'machine learning'         => 'ML',
                         'programming in python'    => 'Python',
                     ];
-
-                    // $difficulty_map = [
-                    //     'easy'    => 'Easy',
-                    //     'difficult'    => 'Hard',
-                    //     'one-mark'    => '1 Mark',
-                    //     'two-marks'   => '2 Marks',
-                    // ];
 
                     $type_map = [
                         'numerical-answers'  => 'NAT',
