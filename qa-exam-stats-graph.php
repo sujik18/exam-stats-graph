@@ -43,7 +43,8 @@ class qa_exam_stats_graph {
                     <option value="difficulty" selected>Difficulty Level</option>
                     <option value="subject">Subject Area</option>
                     <option value="type">Question Type</option>
-                    <option value="perf">Exam Performance</option>
+                    <option value="perf">Exam Performance (Overall)</option>
+                    <optgroup label="Exam Performance by Accesslist" id="accesslist-group"></optgroup>
                 </select>
             </div>
             
@@ -62,7 +63,8 @@ class qa_exam_stats_graph {
 
             let currentChart = null;
 
-            function createPerformanceChart() {
+            function createPerformanceChart(accesslistFilter = null) {
+
                 const canvas = document.getElementById("examStatsChart");
                 if (!canvas) return;
                 
@@ -78,7 +80,25 @@ class qa_exam_stats_graph {
                 canvas.width = parent.offsetWidth;
                 canvas.height = parent.offsetHeight;
 
-                const data = statsData["perf"];
+                let data = statsData["perf"];
+
+                // filtering by accesslist
+                if (accesslistFilter !== null) {
+                    const allowedIds = statsData.accesslist[accesslistFilter].examids;
+
+                    // filter arrays by examids
+                    const indexes = data.id
+                        .map((id, idx) => allowedIds.includes(String(id)) ? idx : -1)
+                        .filter(idx => idx !== -1);
+
+                    data = {
+                        labels: indexes.map(i => data.labels[i]),
+                        exam_names: indexes.map(i => data.exam_names[i]),
+                        user_accuracy: indexes.map(i => data.user_accuracy[i]),
+                        topper_accuracy: indexes.map(i => data.topper_accuracy[i])
+                    };
+                }
+
                 // console.log(data);
                 // console.log(statsData.perf.exam_names);
 
@@ -350,22 +370,27 @@ class qa_exam_stats_graph {
                 requestAnimationFrame(() => createChart("difficulty"));
             });
             
-            // window.addEventListener("load", function () {
-            //     if (examStatsChart) {
-            //         examStatsChart.resize();
-            //     }
-            // });
-                  
+            const accesslistGroup = document.getElementById("accesslist-group");
+
+            Object.keys(statsData.accesslist).forEach(key => {
+                const item = statsData.accesslist[key];
+                const option = document.createElement("option");
+                option.value = "perf_" + key;
+                option.textContent = item.label + ` (${item.count})`;
+                accesslistGroup.appendChild(option);
+            });
+
+                
             // Update chart when category changes
             const categorySelect = document.getElementById("exam-stats-category");
             categorySelect.addEventListener("change", function (e) {
                 const value = e.target.value;
                 if (value === "perf") {
-                    requestAnimationFrame(() => {
-                        requestAnimationFrame(() => {
-                            createPerformanceChart();
-                        });
-                    });
+                    createPerformanceChart(); // Overall performance
+                }
+                else if (value.startsWith("perf_")) {
+                    const acc = value.replace("perf_", "");
+                    createPerformanceChart(acc); // filtered
                 }
                 else {
                     requestAnimationFrame(() => {
@@ -389,7 +414,6 @@ class qa_exam_stats_graph {
         // require_once('/var/www/html/qa/qa-plugin/exam-creator/db/selects.php');
         
         //Labels for chart
-        $difficulty_labels = array('Total', 'Easy', 'Hard', '1 Mark', '2 Marks');
         $subject_labels = array(
             // 'Total',
             
@@ -400,8 +424,10 @@ class qa_exam_stats_graph {
             'V. Aptitude',
             'S. Aptitude',
 
-            'EM', // Engg Maths (Calculus, Probability, Linear Algebra)
-            'DM', // Discrete Maths, Combinatorics, Logic, Graph Theory
+            // Engg Maths (Calculus, Probability, Linear Algebra)
+            'EM',
+            // Discrete Maths, Combinatorics, Logic, Graph Theory
+            'DM',
 
             // Core CS
             'DL',
@@ -421,7 +447,58 @@ class qa_exam_stats_graph {
             
             'Other'
         );
+        $difficulty_labels = array('Total', 'Easy', 'Hard', '1 Mark', '2 Marks');
         $type_labels = array('Total', 'NAT', 'MCQ', 'MSQ');
+        
+        $subject_map = [
+            'analytical aptitude'      => 'A. Aptitude',
+            'general aptitude'         => 'G. Aptitude',
+            'quantitative aptitude'    => 'Q. Aptitude',
+            'verbal aptitude'          => 'V. Aptitude',
+            'spatial aptitude'         => 'S. Aptitude',
+
+            'calculus'                 => 'EM',
+            'probability'              => 'EM',
+            'linear algebra'           => 'EM',
+            'discrete mathematics'     => 'DM',
+            'set theory & algebra'     => 'DM',
+            'combinatory'              => 'DM',
+            'graph theory'             => 'DM',
+            'mathematical logic'       => 'DM',
+
+            'digital logic'            => 'DL',
+            'co and architecture'      => 'COA',
+            'computer networks'        => 'CN',
+            'programming in c'         => 'C & DS',
+            'ds'                       => 'C & DS',
+
+            'algorithms'               => 'Algorithms',
+            'theory of computation'    => 'TOC',
+            'compiler design'          => 'CD',
+            'operating system'         => 'OS',
+            'databases'                => 'Databses',
+
+            'artificial intelligence'  => 'AI',
+            'machine learning'         => 'ML',
+            'programming in python'    => 'Python',
+        ];
+
+        $type_map = [
+            'numerical-answers'  => 'NAT',
+            'msq'                => 'MSQ',
+            'multiple-selects'   => 'MSQ',
+            // 'mcq'                => 'MCQ',
+        ];
+        $accesslist_names_map = [
+            "3" => "GO Test",
+            "1" => "Free GO / GO Classes Test",
+            "6166" => "GO Classes CSE",
+            "5" => "GO Classes DA Test",
+            "6" => "Paid Weekly Quiz",
+            "7" => "Free Weekly Quiz",
+            "8" => "IIIT-H"
+        ];
+
 
         $difficulty_stats = array_fill_keys($difficulty_labels, ['attempted' => 0, 'correct' => 0, 'skipped' => 0]);
         $subject_stats = array_fill_keys($subject_labels, ['attempted' => 0, 'correct' => 0, 'skipped' => 0]);
@@ -457,22 +534,29 @@ class qa_exam_stats_graph {
                 ),
                 true
             );
-            $acc = $exam_row['accesslists'];
-            if ($acc === null || $acc === "") {
-                $acc = "(none)";
+
+            $acc_raw = $exam_row['accesslists'];
+
+            if ($acc_raw === null || trim($acc_raw) === "") {
+                $acc_list = ["(none)"];
+            } else {
+                $acc_list = array_map('trim', explode(',', $acc_raw));
             }
 
-            if (!isset($accesslist_data[$acc])) {
-                $accesslist_data[$acc] = [
-                    'count' => 0,
-                    'examids' => [],
-                    'name' => []
-                ];
-            }
+            foreach ($acc_list as $acc) {
+                if (!isset($accesslist_data[$acc])) {
+                    $accesslist_data[$acc] = [
+                        'count' => 0,
+                        'examids' => [],
+                        'name' => [],
+                        'label' => isset($accesslist_names_map[$acc]) ? $accesslist_names_map[$acc] : "Accesslist $acc"
+                    ];
+                }
 
-            $accesslist_data[$acc]['count']++; 
-            $accesslist_data[$acc]['examids'][] = $examid;
-            $accesslist_data[$acc]['name'][] = $exam_info['name'];
+                $accesslist_data[$acc]['count']++;
+                $accesslist_data[$acc]['examids'][] = $examid;
+                $accesslist_data[$acc]['name'][] = $exam_info['name'];
+            }
 
             // if($exam_info['total_qs'] >= 30){   //show all exams for now
                 $exam_string = 'ExamID ' . $examid;
@@ -547,46 +631,6 @@ class qa_exam_stats_graph {
                     $isAttempted = ($status != 0);
                     $isCorrect   = ($status == 1 || $status == 3);
                     $isSkipped   = ($status == 0);
-                    
-                    $subject_map = [
-                        'analytical aptitude'      => 'A. Aptitude',
-                        'general aptitude'         => 'G. Aptitude',
-                        'quantitative aptitude'    => 'Q. Aptitude',
-                        'verbal aptitude'          => 'V. Aptitude',
-                        'spatial aptitude'         => 'S. Aptitude',
-
-                        'calculus'                 => 'EM',
-                        'probability'              => 'EM',
-                        'linear algebra'           => 'EM',
-                        'discrete mathematics'     => 'DM',
-                        'set theory & algebra'     => 'DM',
-                        'combinatory'              => 'DM',
-                        'graph theory'             => 'DM',
-                        'mathematical logic'       => 'DM',
-
-                        'digital logic'            => 'DL',
-                        'co and architecture'      => 'COA',
-                        'computer networks'        => 'CN',
-                        'programming in c'         => 'C & DS',
-                        'ds'                       => 'C & DS',
-
-                        'algorithms'               => 'Algorithms',
-                        'theory of computation'    => 'TOC',
-                        'compiler design'          => 'CD',
-                        'operating system'         => 'OS',
-                        'databases'                => 'Databses',
-
-                        'artificial intelligence'  => 'AI',
-                        'machine learning'         => 'ML',
-                        'programming in python'    => 'Python',
-                    ];
-
-                    $type_map = [
-                        'numerical-answers'  => 'NAT',
-                        'msq'                => 'MSQ',
-                        'multiple-selects'   => 'MSQ',
-                        // 'mcq'                => 'MCQ',
-                    ];
                     
                     //Subject Area
                     $category_lower = strtolower(trim($qs_array[$j]['category']));
@@ -665,7 +709,16 @@ class qa_exam_stats_graph {
             'user_accuracy' => array_values($exam_user_percentage),
             'topper_accuracy' => array_values($exam_avg_topper_percentage)
         );
+
         // echo '<script> console.log('.json_encode($category_dict).') </script>';
+        $accesslist_filtered = [];
+        // only include accesslists that user has exams in
+        foreach ($accesslist_data as $key => $d) {
+            if ($d['count'] > 0) {
+                $accesslist_filtered[$key] = $d;
+            }
+        }
+
         return array(
             'difficulty' => array(
                 'labels' => $difficulty_labels,
@@ -686,6 +739,7 @@ class qa_exam_stats_graph {
                 'skipped'   => array_map(fn($l) => $type_stats[$l]['skipped'], $type_labels),
             ),
             'perf' => $performance_data,
+            'accesslist' => $accesslist_filtered,
         );
     }
 
