@@ -28,10 +28,11 @@ class qa_exam_stats_graph {
         ), true);
 
         if ($exam_count == 0) return;
-        // if ($userid != $logged_in_userid){
-        //     echo "<script>console.log('Exam Stats Graph Hidden: Other users stats cannot be viewed');</script>";
-        //     return;
-        // }
+
+        if ($userid != $logged_in_userid || (qa_get_logged_in_level() < QA_USER_LEVEL_SUPER)){
+            echo "<script>console.log('Exam Stats Graph Hidden: Other users stats cannot be viewed');</script>";
+            // return;
+        }
         $data = self::get_stats_data($userid);
 
         echo '
@@ -167,8 +168,8 @@ class qa_exam_stats_graph {
                                 callbacks: {
                                     title: function(tooltipItems) {
                                         const index = tooltipItems[0].dataIndex;
-                                        const xLabel = statsData.perf.labels[index];
-                                        const examName = statsData.perf.exam_names[index];
+                                        const xLabel = data.labels[index];
+                                        const examName = data.perf.exam_names[index];
                                         return xLabel + "\n" + examName;
                                     },
                                     label: function(context) {
@@ -503,16 +504,16 @@ class qa_exam_stats_graph {
             // 7: free weekly quiz
             // 8: IIIT-H
             
-            "1" => "GATEOverflow Test Series", //2024 full length
-            "2" => "GATEOverflow Test Series", // 2024
-            "3" => "GATEOverflow Test Series", // 2023
+            "1" => "GATEOverflow Test Series 2024 FLT", //2024 full length
+            "2" => "GATEOverflow Test Series 2024", // 2024
+            "3" => "GATEOverflow Test Series 2023", // 2023
             "0" => "Free CSE Weekly Quiz and Test",
             "6166" => "GO Classes CSE Test Series",
             "18261" => "GO Classes DA Test Series",
             "181161" => "Paid CSE Weekly Quiz",
             "7" => "Free DA Weekly Quiz",
             "8" => "IIIT-H Test Series",
-            "none" => "Open Exam"
+            "(none)" => "Open Exams"
         ];
 
 
