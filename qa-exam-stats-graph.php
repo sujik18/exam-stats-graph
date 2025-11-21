@@ -174,7 +174,7 @@ class qa_exam_stats_graph {
                                     },
                                     label: function(context) {
                                         const index = context.dataIndex;
-                                        const data = statsData.perf;
+                                        const data = data.perf;
 
                                         if (context.dataset.label.includes("Your")) {
                                             return `You: ${data.user_accuracy[index]}%`;
