@@ -452,7 +452,7 @@ class qa_exam_stats_graph {
             
             'Other'
         );
-        $difficulty_labels = array('Total', 'Easy', 'Hard', '1 Mark', '2 Marks');
+        $difficulty_labels = array('Total', 'Easy', 'Medium', 'Hard', '1 Mark', '2 Marks');
         $type_labels = array('Total', 'NAT', 'MCQ', 'MSQ');
         
         $subject_map = [
@@ -602,7 +602,7 @@ class qa_exam_stats_graph {
 
                 $top_avg_marks = ($count > 0) ? $sum_marks / $count : 0;
                 $top_avg_accuracy = ($total_marks > 0) ? ($top_avg_marks / $total_marks) * 100 : 0;
-                if ($top_avg_accuracy > 99) $top_avg_accuracy = 99; //prevent 10%
+                if ($top_avg_accuracy > 99) $top_avg_accuracy = 99; //prevent 100%
                 array_push($exam_avg_topper_percentage, round($top_avg_accuracy, 2));
             // }
 
