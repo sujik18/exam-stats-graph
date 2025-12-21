@@ -97,6 +97,8 @@ class qa_exam_stats_graph {
                         .filter(idx => idx !== -1);
 
                     data = {
+                        id: indexes.map(i => data.id[i]),
+                        date: indexes.map(i => data.date[i]),
                         labels: indexes.map(i => data.labels[i]),
                         exam_names: indexes.map(i => data.exam_names[i]),
                         user_accuracy: indexes.map(i => data.user_accuracy[i]),
@@ -141,6 +143,26 @@ class qa_exam_stats_graph {
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        onClick: (e) => {
+                            const points = currentChart.getElementsAtEventForMode(
+                                e, "index", 
+                                { intersect: false }, 
+                                true
+                            );
+
+                            if (points.length > 0) {
+                                const index = points[0].index;
+                                const id = data.id[index];
+
+                                if (id) {
+                                    const baseUrl = window.location.origin;
+                                    window.open(`${baseUrl}/exam/${id}`, "_blank");
+                                }
+                            }
+                        },
+                        onHover: (event, activeElements) => {
+                            event.native.target.style.cursor = "pointer";
+                        },
                         plugins: {
                             legend: {
                                 position: "top",
@@ -170,7 +192,8 @@ class qa_exam_stats_graph {
                                         const index = tooltipItems[0].dataIndex;
                                         const xLabel = data.labels[index];
                                         const examName = data.exam_names[index];
-                                        return xLabel + "\n" + examName;
+                                        const examDate = data.date[index].split(" ")[0];
+                                        return xLabel + "\n" + "Exam: " + examName + "\n" + "Date: " + examDate;
                                     },
                                     label: function(context) {
                                         const index = context.dataIndex;
@@ -543,13 +566,15 @@ class qa_exam_stats_graph {
         $exam_name = array();
         $exam_ids = array();
         $exam_labels = array();
-        $accesslist_data = [];
+        $accesslist_data = array();
+        $date_array = array();
 
         $exam_marks = array();
         $category_dict = array();
         foreach ($exam_results as $result) {
             $response_table = json_decode(stripslashes($result['responsestring']), true);
             $examid = $result['examid'];
+            $resultid = $result['resultid'];
             $exam_info = RetrieveExamInfo_db($examid, "var");
             $exam_row = qa_db_read_one_assoc(
                 qa_db_query_sub(
@@ -560,6 +585,7 @@ class qa_exam_stats_graph {
                 ),
                 true
             );
+            $date_array[$resultid] = $result['datetime'];
 
             $acc_raw = $exam_row['accesslists'];
 
@@ -730,6 +756,7 @@ class qa_exam_stats_graph {
 
         $performance_data = array(
             'id' => array_values($exam_ids),
+            'date' => array_values($date_array),
             'labels' => array_values($exam_labels),
             'exam_names' => array_values($exam_name),
             'user_accuracy' => array_values($exam_user_percentage),
