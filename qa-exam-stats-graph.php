@@ -99,7 +99,7 @@ class qa_exam_stats_graph {
                     data = {
                         id: indexes.map(i => data.id[i]),
                         date: indexes.map(i => data.date[i]),
-                        labels: indexes.map(i => data.labels[i]),
+                        labels: indexes.map((_, idx) => idx + 1),
                         exam_names: indexes.map(i => data.exam_names[i]),
                         user_accuracy: indexes.map(i => data.user_accuracy[i]),
                         topper_accuracy: indexes.map(i => data.topper_accuracy[i])
@@ -193,7 +193,7 @@ class qa_exam_stats_graph {
                                         const xLabel = data.labels[index];
                                         const examName = data.exam_names[index];
                                         const examDate = data.date[index].split(" ")[0];
-                                        return "Exam: " + xLabel + "\n" 
+                                        return "Exam Number: " + xLabel + "\n" 
                                         // + "Exam ID: " + data.id[index] + "\n" 
                                         + "Exam Name: " + examName + "\n" 
                                         + "Date Taken: " + examDate;
