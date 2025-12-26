@@ -31,7 +31,7 @@ class qa_exam_stats_graph {
 
         if ($userid != $logged_in_userid && (qa_get_logged_in_level() < QA_USER_LEVEL_SUPER)){
             // echo "<script>console.log('Exam Stats Graph Hidden: Other users stats cannot be viewed');</script>";
-            // return;
+            return;
         }
         $data = self::get_stats_data($userid);
 
