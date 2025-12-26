@@ -596,7 +596,10 @@ class qa_exam_stats_graph {
             $accesslist_ids = array_filter(
                 array_map('trim', explode(',', $accesslist_ids_raw))
             );
-            echo '<script> console.log("User Accesslists: '.json_encode($accesslist_ids).'"); </script>';
+            echo '
+            <script>
+                console.log("User Accesslists: ", ' .json_encode($accesslist_ids). ');
+            </script>';
             $accesslist_names_map = [];
 
             if (!empty($accesslist_ids)) {
@@ -618,6 +621,7 @@ class qa_exam_stats_graph {
             echo '
             <script>
                 console.log("User Accesslists:", ' . json_encode($accesslist_ids) . ');
+                console.log("Accesslist Names Map:", ' . json_encode($accesslist_names_map) . ');
             </script>';
 
 
